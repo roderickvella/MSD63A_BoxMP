@@ -46,7 +46,7 @@ public class Lobby : MonoBehaviourPunCallbacks
         if (!PhotonNetwork.IsConnected)
         {
             //Set the App version before connecting
-            PhotonNetwork.PhotonServerSettings.AppSettings.AppVersion = "1.0";
+            PhotonNetwork.PhotonServerSettings.AppSettings.AppVersion = "1.3";
             // Connect to the photon master-server. We use the settings saved in PhotonServerSettings (a .asset file in this project)
             PhotonNetwork.ConnectUsingSettings();
         }
