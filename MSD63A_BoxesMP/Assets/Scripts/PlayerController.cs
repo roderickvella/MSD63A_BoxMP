@@ -55,6 +55,8 @@ public class PlayerController : MonoBehaviour, IPunObservable, IPunInstantiateMa
             vertical = fixedJoystick.Vertical;
         }
 
+        transform.localScale = new Vector3(playerScale.x, playerScale.y, playerScale.z);
+
       
     }
 
@@ -90,6 +92,9 @@ public class PlayerController : MonoBehaviour, IPunObservable, IPunInstantiateMa
     {
         UpdatePlayerName(info.photonView.Owner.NickName);
 
+        float size = Random.Range(0.5f, 1.5f);
+        this.playerScale = new Vector3(size, size, 1);
+
         object[] instantiationData = info.photonView.InstantiationData;
         string colour = (string)instantiationData[0];
 
@@ -106,5 +111,46 @@ public class PlayerController : MonoBehaviour, IPunObservable, IPunInstantiateMa
             GetComponent<SpriteRenderer>().color = Color.green;
         }
 
+    }
+
+    public void ChangeSizeFromMaster(List<PlayerInfo> playerInfos)
+    {
+        foreach(PlayerInfo playerInfo in playerInfos)
+        {
+            if(photonView.Owner.ActorNumber == playerInfo.actorNumber)
+            {
+                print("PlayerInfoSize"+playerInfo.size);
+                this.playerScale = playerInfo.size;
+            }
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            if (photonView.IsMine)
+            {
+                //get scale of object we collided with
+                float scaleOther = collision.transform.localScale.x;
+
+                float scaleMine = this.transform.localScale.x;
+
+                //get id of smallest player
+                int destroyPlayerId;
+                if(scaleMine > scaleOther)
+                {
+                    destroyPlayerId = collision.gameObject.GetComponent<PlayerController>().photonView.Owner.ActorNumber;
+                }
+                else
+                {
+                    destroyPlayerId = this.photonView.Owner.ActorNumber;
+                }
+
+                //inform everyone to destroy (eat) smallest box - player
+                GameObject.Find("Scripts").GetComponent<NetworkManager>().DestroyPlayer(destroyPlayerId);
+
+            }
+        }
     }
 }
